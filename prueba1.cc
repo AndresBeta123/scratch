@@ -98,7 +98,7 @@
   // Definimos una instancia de la clase PoissonRandomVariable y establecemos su valor medio,
   //el valor medio se establece a la inversa del intervalo inter-packet, ya que esto corresponde a la tasa de llegada media para una distribución de Poisson/*PoissonRandomVariable randomArrival;
   //randomArrival.SetAttribute ("Mean", DoubleValue (1.0 / interval));
-  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
+
 
    CommandLine cmd;
    cmd.AddValue ("phyMode", "Wifi Phy mode", phyMode);
