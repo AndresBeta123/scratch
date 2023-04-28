@@ -124,10 +124,31 @@ int main (int argc, char *argv[])
 nodos en la segunda capa. */
 
 // Primera capa
-NodeContiner c1Cluster[10];
+NodeContainer c1Cluster[10];
 for(int i = 0; i < 10; i++) {
-  
+  c1Cluster[i].Create(3);
 }
+
+// Segunda capa
+NodeContainer c2Cluster[8];
+c2Cluster1.Add(c1Cluster1.Get(0));
+c2Cluster1.Add(c1Cluster9.Get(0));
+c2Cluster1.Create(4);
+c2Cluster2.Add(c1Cluster2.Get(0));
+c2Cluster2.Add(c1Cluster10.Get(0));
+c2Cluster2.Create(4);
+c2Cluster3.Add(c1Cluster3.Get(0));
+c2Cluster3.Create(5);
+c2Cluster4.Add(c1Cluster4.Get(0));
+c2Cluster4.Create(5);
+c2Cluster5.Add(c1Cluster5.Get(0));
+c2Cluster5.Create(5);
+c2Cluster6.Add(c1Cluster6.Get(0));
+c2Cluster6.Create(5);
+c2Cluster7.Add(c1Cluster7.Get(0));
+c2Cluster7.Create(5);
+c2Cluster8.Add(c1Cluster8.Get(0));
+
 
 //Primera capa--------------------
 NodeContainer c1Cluster1;
