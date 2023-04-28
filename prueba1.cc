@@ -123,7 +123,11 @@ int main (int argc, char *argv[])
 /*Este escenario tenía 10 clústeres con 3 nodos en la primera capa y 8 clústeres con 6
 nodos en la segunda capa. */
 
-
+// Primera capa
+NodeContiner c1Cluster[10];
+for(int i = 0; i < 10; i++) {
+  
+}
 
 //Primera capa--------------------
 NodeContainer c1Cluster1;
