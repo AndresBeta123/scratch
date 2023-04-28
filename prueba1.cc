@@ -149,18 +149,18 @@ c1Cluster10.Create(3);
 //Final Primera capa--------------------
 //Segunda capa--------------------
 NodeContainer c2Cluster1;
-c2CLuster1.Add(c1Cluster1.Get(0));
-c2CLuster1.Add(c1Cluster9.Get(0));
+c2Cluster1.Add(c1Cluster1.Get(0));
+c2Cluster1.Add(c1Cluster9.Get(0));
 c2Cluster1.Create(4);
 NodeContainer c2Cluster2;
-c2CLuster2.Add(c1Cluster2.Get(0));
-c2CLuster2.Add(c1Cluster10.Get(0));
+c2Cluster2.Add(c1Cluster2.Get(0));
+c2Cluster2.Add(c1Cluster10.Get(0));
 c2Cluster2.Create(4);
 NodeContainer c2Cluster3;
-c2CLuster3.Add(c1Cluster3.Get(0));
+c2Cluster3.Add(c1Cluster3.Get(0));
 c2Cluster3.Create(5);
 NodeContainer c2Cluster4;
-c2CLuster4.Add(c1Cluster4.Get(0));
+c2Cluster4.Add(c1Cluster4.Get(0));
 c2Cluster4.Create(5);
 NodeContainer c2Cluster5;
 c2Cluster5.Add(c1Cluster5.Get(0));
@@ -194,15 +194,57 @@ c3Cluster1.Add(c2Cluster8.Get(1));
       wifi.EnableLogComponents ();  // Turn on all Wifi logging
     }
 
-  YansWifiPhyHelper wifiPhy;
+  YansWifiPhyHelper wifiPhy1, wifiPhy2, wifiPhy3, wifiPhy4, wifiPhy5, wifiPhy6, wifiPhy7, wifiPhy8, wifiPhy9, wifiPhy10, wifiPhy11, wifiPhy12, wifiPhy13, wifiPhy14, wifiPhy15, wifiPhy16, wifiPhy17, wifiPhy18, wifiPhy19;
   // set it to zero; otherwise, gain will be added
-  wifiPhy.Set ("RxGain", DoubleValue (-10) );
+   wifiPhy1.Set ("RxGain", DoubleValue (-10) );
+   wifiPhy2.Set ("RxGain", DoubleValue (-10) );
+   wifiPhy3.Set ("RxGain", DoubleValue (-10) );
+   wifiPhy4.Set ("RxGain", DoubleValue (-10) );
+   wifiPhy5.Set ("RxGain", DoubleValue (-10) );
+   wifiPhy6.Set ("RxGain", DoubleValue (-10) );
+   wifiPhy7.Set ("RxGain", DoubleValue (-10) );
+   wifiPhy8.Set ("RxGain", DoubleValue (-10) );
+   wifiPhy9.Set ("RxGain", DoubleValue (-10) );
+   wifiPhy10.Set ("RxGain", DoubleValue (-10) );
+   //Fin capa 1, inicio capa 2
+   wifiPhy11.Set ("RxGain", DoubleValue (-10) );
+   wifiPhy12.Set ("RxGain", DoubleValue (-10) );
+   wifiPhy13.Set ("RxGain", DoubleValue (-10) );
+   wifiPhy14.Set ("RxGain", DoubleValue (-10) );
+   wifiPhy15.Set ("RxGain", DoubleValue (-10) );
+   wifiPhy16.Set ("RxGain", DoubleValue (-10) );
+   wifiPhy17.Set ("RxGain", DoubleValue (-10) );
+   wifiPhy18.Set ("RxGain", DoubleValue (-10) );
+   //FIn capa 2, inicio capa 3
+   wifiPhy19.Set ("RxGain", DoubleValue (-10) );
+   
+   
 
 
   YansWifiChannelHelper wifiChannel;
   wifiChannel.SetPropagationDelay ("ns3::ConstantSpeedPropagationDelayModel");
   wifiChannel.AddPropagationLoss ("ns3::FriisPropagationLossModel");
-  wifiPhy.SetChannel (wifiChannel.Create ());
+  wifiPhy1.SetChannel (wifiChannel.Create ());
+  wifiPhy2.SetChannel (wifiChannel.Create ());
+  wifiPhy3.SetChannel (wifiChannel.Create ());
+  wifiPhy4.SetChannel (wifiChannel.Create ());
+  wifiPhy5.SetChannel (wifiChannel.Create ());
+  wifiPhy6.SetChannel (wifiChannel.Create ());
+  wifiPhy7.SetChannel (wifiChannel.Create ());
+  wifiPhy8.SetChannel (wifiChannel.Create ());
+  wifiPhy9.SetChannel (wifiChannel.Create ());
+  wifiPhy10.SetChannel (wifiChannel.Create ());
+   //Fin capa 1, inicio capa 2
+  wifiPhy11.SetChannel (wifiChannel.Create ());
+  wifiPhy12.SetChannel (wifiChannel.Create ());
+  wifiPhy13.SetChannel (wifiChannel.Create ());
+  wifiPhy14.SetChannel (wifiChannel.Create ());
+  wifiPhy15.SetChannel (wifiChannel.Create ());
+  wifiPhy16.SetChannel (wifiChannel.Create ());
+  wifiPhy17.SetChannel (wifiChannel.Create ());
+  wifiPhy18.SetChannel (wifiChannel.Create ());
+   //FIn capa 2, inicio capa 3
+  wifiPhy19.SetChannel (wifiChannel.Create ());
 
 
   // Add an upper mac and disable rate control
@@ -214,8 +256,29 @@ c3Cluster1.Add(c2Cluster8.Get(1));
   // Set it to adhoc mode
   wifiMac.SetType ("ns3::AdhocWifiMac");
 
-  NetDeviceContainer devices2 = wifi.Install (wifiPhy, wifiMac, Cluster1);
-  NetDeviceContainer devices3 = wifi.Install (wifiPhy, wifiMac, Cluster2);
+  NetDeviceContainer devices1 = wifi.Install (wifiPhy1, wifiMac, c1Cluster1);
+  NetDeviceContainer devices2 = wifi.Install (wifiPhy2, wifiMac, c1Cluster2);
+  NetDeviceContainer devices3 = wifi.Install (wifiPhy3, wifiMac, c1Cluster3);
+  NetDeviceContainer devices4 = wifi.Install (wifiPhy4, wifiMac, c1Cluster4);
+  NetDeviceContainer devices5 = wifi.Install (wifiPhy5, wifiMac, c1Cluster5);
+  NetDeviceContainer devices6 = wifi.Install (wifiPhy6, wifiMac, c1Cluster6);
+  NetDeviceContainer devices7 = wifi.Install (wifiPhy7, wifiMac, c1Cluster7);
+  NetDeviceContainer devices8 = wifi.Install (wifiPhy8, wifiMac, c1Cluster8);
+  NetDeviceContainer devices9 = wifi.Install (wifiPhy9, wifiMac, c1Cluster9);
+  NetDeviceContainer devices10 = wifi.Install (wifiPhy10, wifiMac, c1Cluster10);
+  //Fin capa 1, inicio capa 2
+  NetDeviceContainer devices11 = wifi.Install (wifiPhy11, wifiMac, c2Cluster1);
+  NetDeviceContainer devices12 = wifi.Install (wifiPhy12, wifiMac, c2Cluster2);
+  NetDeviceContainer devices13 = wifi.Install (wifiPhy13, wifiMac, c2Cluster3);
+  NetDeviceContainer devices14 = wifi.Install (wifiPhy14, wifiMac, c2Cluster4);
+  NetDeviceContainer devices15 = wifi.Install (wifiPhy15, wifiMac, c2Cluster5);
+  NetDeviceContainer devices16 = wifi.Install (wifiPhy16, wifiMac, c2Cluster6);
+  NetDeviceContainer devices17 = wifi.Install (wifiPhy17, wifiMac, c2Cluster7);
+  NetDeviceContainer devices18 = wifi.Install (wifiPhy18, wifiMac, c2Cluster8);
+  //FIn capa 2, inicio capa 3
+  NetDeviceContainer devices19 = wifi.Install (wifiPhy19, wifiMac, c3Cluster1);
+ 
+  
 
 
   MobilityHelper mobility;
@@ -227,8 +290,9 @@ c3Cluster1.Add(c2Cluster8.Get(1));
                                 "GridWidth", UintegerValue (5),
                                 "LayoutType", StringValue ("RowFirst"));
   mobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
-  mobility.Install (Cluster1);
-  mobility.Install (Cluster2);
+
+  mobility.InstallAll();
+  
   //Enable OLSR
   OlsrHelper olsr;
   Ipv4StaticRoutingHelper staticRouting;
@@ -239,24 +303,79 @@ c3Cluster1.Add(c2Cluster8.Get(1));
 
   InternetStackHelper internet;
   internet.SetRoutingHelper (list); // has effect on the next Install ()
-  internet.Install (Cluster1);
-  internet.Install (Cluster2);
-
+/*   internet.Install (c1Cluster1);
+  internet.Install (c1Cluster2);
+  internet.Install (c1Cluster3);
+  internet.Install (c1Cluster4);
+  internet.Install (c1Cluster5);
+  internet.Install (c1Cluster6);
+  internet.Install (c1Cluster7);
+  internet.Install (c1Cluster8);
+  internet.Install (c1Cluster9);
+  internet.Install (c1Cluster10);
+  //Fin capa 1, inicio capa 2
+  internet.Install (c2Cluster1);
+  internet.Install (c2Cluster2);
+  internet.Install (c2Cluster3);
+  internet.Install (c2Cluster4);
+  internet.Install (c2Cluster5);
+  internet.Install (c2Cluster6);
+  internet.Install (c2Cluster7);
+  internet.Install (c2Cluster8);
+  //FIn capa 2, inicio capa 3
+ */
+  internet.InstallAll();
   Ipv4AddressHelper ipv4;
   NS_LOG_INFO ("Assign IP Addresses.");
+
   ipv4.SetBase ("10.1.1.0", "255.255.255.0");
   Ipv4InterfaceContainer d1 = ipv4.Assign (devices1);
   ipv4.SetBase ("10.1.2.0", "255.255.255.0");
   Ipv4InterfaceContainer d2 = ipv4.Assign (devices2);
   ipv4.SetBase ("10.1.3.0", "255.255.255.0");
   Ipv4InterfaceContainer d3 = ipv4.Assign (devices3);
-    TypeId tid = TypeId::LookupByName ("ns3::UdpSocketFactory");
-  Ptr<Socket> recvSink = Socket::CreateSocket (heads.Get(1), tid);
+  ipv4.SetBase ("10.1.4.0", "255.255.255.0");
+  Ipv4InterfaceContainer d4 = ipv4.Assign (devices4);
+  ipv4.SetBase ("10.1.5.0", "255.255.255.0");
+  Ipv4InterfaceContainer d5 = ipv4.Assign (devices5);
+  ipv4.SetBase ("10.1.6.0", "255.255.255.0");
+  Ipv4InterfaceContainer d6 = ipv4.Assign (devices6);
+  ipv4.SetBase ("10.1.7.0", "255.255.255.0");
+  Ipv4InterfaceContainer d7 = ipv4.Assign (devices7);
+  ipv4.SetBase ("10.1.8.0", "255.255.255.0");
+  Ipv4InterfaceContainer d8 = ipv4.Assign (devices8);
+  ipv4.SetBase ("10.1.9.0", "255.255.255.0");
+  Ipv4InterfaceContainer d9 = ipv4.Assign (devices9);
+  ipv4.SetBase ("10.1.10.0", "255.255.255.0");
+  Ipv4InterfaceContainer d10 = ipv4.Assign (devices10);
+  //Fin capa 1, inicio capa 2
+  ipv4.SetBase ("10.1.11.0", "255.255.255.0");
+  Ipv4InterfaceContainer d11 = ipv4.Assign (devices11);
+  ipv4.SetBase ("10.1.12.0", "255.255.255.0");
+  Ipv4InterfaceContainer d12 = ipv4.Assign (devices12);
+  ipv4.SetBase ("10.1.13.0", "255.255.255.0");
+  Ipv4InterfaceContainer d13 = ipv4.Assign (devices13);
+  ipv4.SetBase ("10.1.14.0", "255.255.255.0");
+  Ipv4InterfaceContainer d14 = ipv4.Assign (devices14);
+  ipv4.SetBase ("10.1.15.0", "255.255.255.0");
+  Ipv4InterfaceContainer d15 = ipv4.Assign (devices15);
+  ipv4.SetBase ("10.1.16.0", "255.255.255.0");
+  Ipv4InterfaceContainer d16 = ipv4.Assign (devices16);
+  ipv4.SetBase ("10.1.17.0", "255.255.255.0");
+  Ipv4InterfaceContainer d17 = ipv4.Assign (devices17);
+  ipv4.SetBase ("10.1.18.0", "255.255.255.0");
+  Ipv4InterfaceContainer d18 = ipv4.Assign (devices18);
+  //Fin capa 2, inicio capa 3
+  ipv4.SetBase ("10.1.19.0", "255.255.255.0");
+  Ipv4InterfaceContainer d19 = ipv4.Assign (devices19);
+  
+    TypeId tid = TypeId::LookupByName ("ns3::UdpSocketFactory");//Fabian god tiene que acordarme
+  Ptr<Socket> recvSink = Socket::CreateSocket (c1Cluster1.Get(1), tid);
   InetSocketAddress local = InetSocketAddress (Ipv4Address::GetAny (), 80);
   recvSink->Bind (local);
   recvSink->SetRecvCallback (MakeCallback (&ReceivePacket));
 
-  Ptr<Socket> source = Socket::CreateSocket (Cluster2.Get(0), tid);
+  Ptr<Socket> source = Socket::CreateSocket (c1Cluster8.Get(0), tid);
   InetSocketAddress remote = InetSocketAddress (d1.GetAddress (1, 0), 80);
   source->Connect (remote);
 
@@ -267,10 +386,61 @@ c3Cluster1.Add(c2Cluster8.Get(1));
       AsciiTraceHelper ascii;
       wifiPhy1.EnableAsciiAll (ascii.CreateFileStream ("wifi-simple-adhoc-grid.tr"));
       wifiPhy1.EnablePcap ("wifi-simple-adhoc-grid", devices1);
+
       wifiPhy2.EnableAsciiAll (ascii.CreateFileStream ("wifi-simple-adhoc-grid.tr"));
       wifiPhy2.EnablePcap ("wifi-simple-adhoc-grid", devices2);
+
       wifiPhy3.EnableAsciiAll (ascii.CreateFileStream ("wifi-simple-adhoc-grid.tr"));
       wifiPhy3.EnablePcap ("wifi-simple-adhoc-grid", devices3);
+
+      wifiPhy4.EnableAsciiAll (ascii.CreateFileStream ("wifi-simple-adhoc-grid.tr"));
+      wifiPhy4.EnablePcap ("wifi-simple-adhoc-grid", devices4);
+
+      wifiPhy5.EnableAsciiAll (ascii.CreateFileStream ("wifi-simple-adhoc-grid.tr"));
+      wifiPhy5.EnablePcap ("wifi-simple-adhoc-grid", devices5);
+
+      wifiPhy6.EnableAsciiAll (ascii.CreateFileStream ("wifi-simple-adhoc-grid.tr"));
+      wifiPhy6.EnablePcap ("wifi-simple-adhoc-grid", devices6);
+
+      wifiPhy7.EnableAsciiAll (ascii.CreateFileStream ("wifi-simple-adhoc-grid.tr"));
+      wifiPhy7.EnablePcap ("wifi-simple-adhoc-grid", devices7);
+
+      wifiPhy8.EnableAsciiAll (ascii.CreateFileStream ("wifi-simple-adhoc-grid.tr"));
+      wifiPhy8.EnablePcap ("wifi-simple-adhoc-grid", devices8);
+
+      wifiPhy9.EnableAsciiAll (ascii.CreateFileStream ("wifi-simple-adhoc-grid.tr"));
+      wifiPhy9.EnablePcap ("wifi-simple-adhoc-grid", devices9);
+
+      wifiPhy10.EnableAsciiAll (ascii.CreateFileStream ("wifi-simple-adhoc-grid.tr"));
+      wifiPhy10.EnablePcap ("wifi-simple-adhoc-grid", devices10);
+
+      wifiPhy11.EnableAsciiAll (ascii.CreateFileStream ("wifi-simple-adhoc-grid.tr"));
+      wifiPhy11.EnablePcap ("wifi-simple-adhoc-grid", devices11);
+
+      wifiPhy12.EnableAsciiAll (ascii.CreateFileStream ("wifi-simple-adhoc-grid.tr"));
+      wifiPhy12.EnablePcap ("wifi-simple-adhoc-grid", devices12);
+
+      wifiPhy13.EnableAsciiAll (ascii.CreateFileStream ("wifi-simple-adhoc-grid.tr"));
+      wifiPhy13.EnablePcap ("wifi-simple-adhoc-grid", devices13);
+
+      wifiPhy14.EnableAsciiAll (ascii.CreateFileStream ("wifi-simple-adhoc-grid.tr"));
+      wifiPhy14.EnablePcap ("wifi-simple-adhoc-grid", devices14);
+
+      wifiPhy15.EnableAsciiAll (ascii.CreateFileStream ("wifi-simple-adhoc-grid.tr"));
+      wifiPhy15.EnablePcap ("wifi-simple-adhoc-grid", devices15);
+
+      wifiPhy16.EnableAsciiAll (ascii.CreateFileStream ("wifi-simple-adhoc-grid.tr"));
+      wifiPhy16.EnablePcap ("wifi-simple-adhoc-grid", devices16);
+
+      wifiPhy17.EnableAsciiAll (ascii.CreateFileStream ("wifi-simple-adhoc-grid.tr"));
+      wifiPhy17.EnablePcap ("wifi-simple-adhoc-grid", devices17);
+
+      wifiPhy18.EnableAsciiAll (ascii.CreateFileStream ("wifi-simple-adhoc-grid.tr"));
+      wifiPhy18.EnablePcap ("wifi-simple-adhoc-grid", devices18);
+
+      wifiPhy19.EnableAsciiAll (ascii.CreateFileStream ("wifi-simple-adhoc-grid.tr"));
+      wifiPhy19.EnablePcap ("wifi-simple-adhoc-grid", devices19);
+
       // Trace routing tables
       Ptr<OutputStreamWrapper> routingStream = Create<OutputStreamWrapper> ("wifi-simple-adhoc-grid.routes", std::ios::out);
       olsr.PrintRoutingTableAllEvery (Seconds (2), routingStream);
