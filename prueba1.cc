@@ -164,7 +164,7 @@ int main (int argc, char *argv[])
   wifiChannel.SetPropagationDelay ("ns3::ConstantSpeedPropagationDelayModel");
   wifiChannel.AddPropagationLoss ("ns3::FriisPropagationLossModel");
 
-  for(int i = 0; i < 18; i++) {
+  for(int i = 0; i < 19; i++) {
     wifiPhy[i].SetChannel (wifiChannel.Create ());
   }
 
@@ -219,23 +219,24 @@ int main (int argc, char *argv[])
 
   // TODO de aqui en adelante
   NS_LOG_INFO ("Assign IP Addresses.");
-  Ipv4AddressHelper ipv4 [19];
+  //Ipv4AddressHelper ipv4 [19];
+  Ipv4AddressHelper ipv4;
+  ipv4.SetBase("10.1.1.0", "255.255.255.0");
   Ipv4InterfaceContainer d1 [19];
+
   for(int i = 0; i < 19; i++) {
     //Ipv4Address netAddress = Ipv4Address("10.1." + to_string(i) + ".0");
-    ipv4[i].SetBase("10.1.1.0", "255.255.255.0");
-    d1[i] = ipv4[i].Assign(devices[i]);
+    d1[i] = ipv4.Assign(devices[i]);
 
-    
   }
   
   TypeId tid = TypeId::LookupByName ("ns3::UdpSocketFactory");//Fabian god tiene que acordarme // no me acuerdo de qué
-  Ptr<Socket> recvSink = Socket::CreateSocket (c1Cluster[0].Get(1), tid);
+  Ptr<Socket> recvSink = Socket::CreateSocket (c1Cluster[0].Get(0), tid);
   InetSocketAddress local = InetSocketAddress (Ipv4Address::GetAny (), 80);
   recvSink->Bind (local);
   recvSink->SetRecvCallback (MakeCallback (&ReceivePacket));
 
-  Ptr<Socket> source = Socket::CreateSocket (c1Cluster[7].Get(0), tid);
+  Ptr<Socket> source = Socket::CreateSocket (c1Cluster[0].Get(0), tid);
   InetSocketAddress remote = InetSocketAddress (d1[0].GetAddress (1, 0), 80);
   source->Connect (remote);
 
