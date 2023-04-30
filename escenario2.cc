@@ -124,7 +124,7 @@ int main (int argc, char *argv[])
     c2Cluster[i].Add(c1Cluster[i].Get(0));
   }
 
-  c2Cluster[0].Add(c1Cluster[numClustersCap2].Get(0));
+  c2Cluster[0].Add(c1Cluster[8].Get(0));
   c2Cluster[1].Add(c1Cluster[9].Get(0));
 
   // Tercera capa
