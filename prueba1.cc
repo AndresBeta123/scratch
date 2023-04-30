@@ -62,23 +62,6 @@ static void GenerateTraffic (Ptr<Socket> socket, uint32_t pktSize,
     }
 }
 
-//Modificamos la función GenerateTraffic() para que genere paquetes con tiempos de llegada aleatorios
-
-/* static void GenerateTraffic (Ptr<Socket> socket, uint32_t pktSize,
-                              uint32_t pktCount, Time pktInterval)
-{
-  if (pktCount > 0)
-    {
-      socket->Send (Create<Packet> (pktSize));
-      Time tNextPacket = Seconds(randomArrival.GetValue());
-      Simulator::Schedule (tNextPacket, &GenerateTraffic,
-                          socket, pktSize,pktCount - 1, pktInterval );
-    }
-  else
-    {
-      socket->Close ();
-    }
-} */
   
 int main (int argc, char *argv[])
 {
@@ -89,6 +72,10 @@ int main (int argc, char *argv[])
   uint32_t numNodes = 6;  // by default, 5x5
   uint32_t sinkNode = 1;
   uint32_t sourceNode = 0;
+  int numClustersCap1 = 10; // Escenario 2
+  int numClustersCap2 = 8;
+  int numNodesCap1 = 3;
+  int numTotalClusters = numClustersCap1+numClustersCap2+1;
   double interval = 1.0; //Seconds
   bool verbose = false;
   bool tracing = false;
@@ -118,31 +105,31 @@ int main (int argc, char *argv[])
                       StringValue (phyMode));
 
 
-  //Escenario 3--------------------------------------------------------------------------
+  //Escenario 2--------------------------------------------------------------------------
 
   /*Este escenario tenía 10 clústeres con 3 nodos en la primera capa y 8 clústeres con 6
   nodos en la segunda capa. */
 
   // Primera capa
-  NodeContainer c1Cluster[10];
-  for(int i = 0; i < 10; i++) {
-    c1Cluster[i].Create(3);
+  NodeContainer c1Cluster[numClustersCap1];
+  for(int i = 0; i < numClustersCap1; i++) {
+    c1Cluster[i].Create(numNodesCap1);
   }
 
   // Segunda capa
-  NodeContainer c2Cluster[8];
-  for(int i = 0; i < 8; i++) {
+  NodeContainer c2Cluster[numClustersCap2];
+  for(int i = 0; i < numClustersCap2; i++) {
     c2Cluster[i].Create(4);
     if(i > 1) c2Cluster[i].Create(1);   // Crear uno extra para los clusters con solo 1 cabeza
     c2Cluster[i].Add(c1Cluster[i].Get(0));
   }
 
-  c2Cluster[0].Add(c1Cluster[8].Get(0));
+  c2Cluster[0].Add(c1Cluster[numClustersCap2].Get(0));
   c2Cluster[1].Add(c1Cluster[9].Get(0));
 
   // Tercera capa
   NodeContainer c3Cluster;
-  for(int i = 0; i < 8; i++) {
+  for(int i = 0; i < numClustersCap2; i++) {
     c3Cluster.Add(c2Cluster[i].Get(0));
   }
 
@@ -153,9 +140,9 @@ int main (int argc, char *argv[])
       wifi.EnableLogComponents ();  // Turn on all Wifi logging
     }
 
-  YansWifiPhyHelper wifiPhy[19]; 
+  YansWifiPhyHelper wifiPhy[numTotalClusters]; 
   // set it to zero; otherwise, gain will be added
-  for(int i = 0; i < 19; i++) {
+  for(int i = 0; i < numTotalClusters; i++) {
     wifiPhy[i].Set ("RxGain", DoubleValue (-10));
 
   }
@@ -164,7 +151,7 @@ int main (int argc, char *argv[])
   wifiChannel.SetPropagationDelay ("ns3::ConstantSpeedPropagationDelayModel");
   wifiChannel.AddPropagationLoss ("ns3::FriisPropagationLossModel");
 
-  for(int i = 0; i < 19; i++) {
+  for(int i = 0; i < numTotalClusters; i++) {
     wifiPhy[i].SetChannel (wifiChannel.Create ());
   }
 
@@ -178,32 +165,36 @@ int main (int argc, char *argv[])
   // Set it to adhoc mode
   wifiMac.SetType ("ns3::AdhocWifiMac");
 
-
-  NetDeviceContainer devices[19];
+  NetDeviceContainer devices[numTotalClusters];
   // 1ra capa
-  for(int i = 0; i < 10; i++) {
+  for(int i = 0; i < numClustersCap1; i++) {
   devices[i] = wifi.Install (wifiPhy[i], wifiMac, c1Cluster[i]);
   }
 
   // 2da capa
-  for(int i = 0; i < 8; i++) {
-  devices[i+10] = wifi.Install (wifiPhy[i+10], wifiMac, c2Cluster[i]);
+  for(int i = 0; i < numClustersCap2; i++) {
+  devices[i+numClustersCap1] = wifi.Install (wifiPhy[i+numClustersCap1], wifiMac, c2Cluster[i]);
   }
 
   // 3ra capa
-  devices[18] = wifi.Install (wifiPhy[18], wifiMac, c3Cluster);
- 
-  MobilityHelper mobility;
-  mobility.SetPositionAllocator ("ns3::GridPositionAllocator",
-                                "MinX", DoubleValue (0.0),
-                                "MinY", DoubleValue (0.0),
-                                "DeltaX", DoubleValue (distance),
-                                "DeltaY", DoubleValue (distance),
-                                "GridWidth", UintegerValue (5),
-                                "LayoutType", StringValue ("RowFirst"));
-  mobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
+  devices[numTotalClusters-1] = wifi.Install (wifiPhy[numTotalClusters-1], wifiMac, c3Cluster);
 
-  mobility.InstallAll();
+  // Movilidad de los nodos
+  MobilityHelper mobilityLayer;
+
+  ObjectFactory pos;
+  pos.SetTypeId("ns3::RandomRectanglePositionAllocator");
+  pos.Set ("X", StringValue ("ns3::UniformRandomVariable[Min=0.0|Max=100.0]"));
+  pos.Set ("Y", StringValue ("ns3::UniformRandomVariable[Min=0.0|Max=100.0]"));
+  Ptr<PositionAllocator> posAlloc = pos.Create()->GetObject<PositionAllocator>();
+
+  mobilityLayer.SetMobilityModel("ns3::RandomWaypointMobilityModel", 
+                          "Speed", StringValue ("ns3::UniformRandomVariable[Min=0|Max=1]"),
+                          "Pause", StringValue ("ns3::ConstantRandomVariable[Constant=0.0]"),
+                          "PositionAllocator", PointerValue(posAlloc));
+  mobilityLayer.SetPositionAllocator (posAlloc);
+
+  mobilityLayer.InstallAll();
   
   //Enable OLSR
   OlsrHelper olsr;
@@ -217,57 +208,39 @@ int main (int argc, char *argv[])
   internet.SetRoutingHelper (list); // has effect on the next Install ()
   internet.InstallAll();
 
-  // TODO de aqui en adelante
   NS_LOG_INFO ("Assign IP Addresses.");
-  //Ipv4AddressHelper ipv4 [19];
   Ipv4AddressHelper ipv4;
-  ipv4.SetBase("10.1.1.0", "255.255.255.0");
-  Ipv4InterfaceContainer d1 [19];
 
-  for(int i = 0; i < 19; i++) {
-    //Ipv4Address netAddress = Ipv4Address("10.1." + to_string(i) + ".0");
+  Ipv4InterfaceContainer d1 [numTotalClusters];
+  for(int i = 0; i < numTotalClusters; i++) {
+    string a = ("10.1." + to_string(i) + ".0");
+    ipv4.SetBase(a.c_str(), "255.255.255.0");
     d1[i] = ipv4.Assign(devices[i]);
-
   }
   
-  TypeId tid = TypeId::LookupByName ("ns3::UdpSocketFactory");//Fabian god tiene que acordarme // no me acuerdo de qué
-  Ptr<Socket> recvSink = Socket::CreateSocket (c1Cluster[0].Get(0), tid);
-  InetSocketAddress local = InetSocketAddress (Ipv4Address::GetAny (), 80);
-  recvSink->Bind (local);
-  recvSink->SetRecvCallback (MakeCallback (&ReceivePacket));
-
-  Ptr<Socket> source = Socket::CreateSocket (c1Cluster[0].Get(0), tid);
-  InetSocketAddress remote = InetSocketAddress (d1[0].GetAddress (1, 0), 80);
-  source->Connect (remote);
-
-//Escenario 3--------------------------------------------------------------------------
-
-  if (tracing == true)
-    {
-      AsciiTraceHelper ascii;
-
-      for(int i = 0; i < 19; i++) {
-        wifiPhy[i].EnableAsciiAll (ascii.CreateFileStream ("wifi-simple-adhoc-grid.tr"));
-        wifiPhy[i].EnablePcap ("wifi-simple-adhoc-grid", devices[i]);
-      }
-
-      // Trace routing tables
-      Ptr<OutputStreamWrapper> routingStream = Create<OutputStreamWrapper> ("wifi-simple-adhoc-grid.routes", std::ios::out);
-      olsr.PrintRoutingTableAllEvery (Seconds (2), routingStream);
-      Ptr<OutputStreamWrapper> neighborStream = Create<OutputStreamWrapper> ("wifi-simple-adhoc-grid.neighbors", std::ios::out);
-      olsr.PrintNeighborCacheAllEvery (Seconds (2), neighborStream);
 
 
+  //Escenario 2--------------------------------------------------------------------------
 
-      // To do-- enable an IP-level trace that shows forwarding events only
-    } 
+  // TODO ESTE PERRO CODIGO ES PARA EL QUE RECIBE
+  // Generando aplicacion para instalar en el que recibe
+  PacketSinkHelper sink("ns3::UdpSocketFactory", Address(InetSocketAddress(d1[0].GetAddress(0, 0), 10)));
+  ApplicationContainer app = sink.Install(c1Cluster[0].Get(0));
 
-  
+  // Generamos el onOff hacia el que recibe
+  OnOffHelper onOffHelper("ns3::UdpSocketFactory", Address(InetSocketAddress(d1[0].GetAddress(0, 0), 10)));
+  onOffHelper.SetAttribute("OnTime", StringValue("ns3::ConstantRandomVariable[Constant=4]"));
+  onOffHelper.SetAttribute("OffTime", StringValue("ns3::ConstantRandomVariable[Constant=0]"));
+  onOffHelper.SetAttribute("DataRate", StringValue("1Mbps"));
+  onOffHelper.SetAttribute("PacketSize", UintegerValue(1024));
 
+  // SOLO ESTA PINCHE LINEA ES PARA EL QUE ENVIA
+  // Instalo en el aplicationContainer el onOffHelper
+  app = onOffHelper.Install(c1Cluster[1].Get(0));
 
-  //Give OLSR time to converge-- 30 seconds perhaps
-  Simulator::Schedule (Seconds (10.0), &GenerateTraffic,
-                      source, packetSize, numPackets, interPacketInterval);
+  app.Start(Seconds(30.0));
+  app.Stop(Seconds(40.0));
+
 
   // Output what we are doing
   NS_LOG_UNCOND ("Testing from node " << sourceNode << " to " << sinkNode << " with grid distance " << distance);
