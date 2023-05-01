@@ -73,12 +73,13 @@ void createOnOff(NodeContainer sourceNodeContainer, uint32_t sourceClusterIndex,
   OnOffHelper onOffHelper("ns3::UdpSocketFactory", Address(InetSocketAddress(sinkInterface.GetAddress(x, 0), 10)));
   onOffHelper.SetAttribute("OnTime", PointerValue(expTime));
   onOffHelper.SetAttribute("OffTime", PointerValue(expTime));
-  onOffHelper.SetAttribute("DataRate", StringValue(to_string(dataRate*(static_cast<double>(capacidadCap2)/numClustersCap1))+"Mbps"));
+  onOffHelper.SetAttribute("DataRate", StringValue(to_string(static_cast<int>((dataRate*(static_cast<double>(capacidadCap2)/numClustersCap1) * 1000)))+"Kbps"));
   onOffHelper.SetAttribute("PacketSize", UintegerValue(packetSize));
 
   app = onOffHelper.Install(sourceNodeContainer.Get(y));
   
 
+  cout << "este: " + to_string(static_cast<int>((dataRate*(static_cast<double>(capacidadCap2)/numClustersCap1) * 1000))) << endl;
   // cout << to_string(capacidadCap2) + "-" << to_string(numClustersCap1) + "-" << to_string(static_cast<double>(capacidadCap2)/numClustersCap1) << to_string((dataRate*(capacidadCap2/numClustersCap1))) << endl;
   cout <<to_string(expTime->GetValue())+ ","+ to_string(expTime->GetValue()) << endl;
   app.Start(Seconds(30.0));
