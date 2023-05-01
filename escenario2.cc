@@ -39,7 +39,6 @@ using namespace std;
 NS_LOG_COMPONENT_DEFINE ("WifiSimpleAdhocGrid");
 
 std::string phyMode ("DsssRate1Mbps");
-double distance = 10;  // m
 uint32_t packetSize = 1000; // bytes
 uint32_t numPackets = 1;
 uint32_t numNodes = 6;  // by default, 5x5
@@ -53,6 +52,7 @@ double interval = 1.0; //Seconds
 bool verbose = false;
 bool tracing = false;
 
+
 static double geometric_truncated(int x, double p, int k)
 {
     return pow(1 - p, x - 1) * p / (1 - pow(1 - p, k));
@@ -64,11 +64,10 @@ void createOnOff(NodeContainer sourceNodeContainer, uint32_t sourceClusterIndex,
 
   Ptr<ExponentialRandomVariable> expTime = CreateObject<ExponentialRandomVariable>();
 
-  expTime->SetAttribute("Mean", DoubleValue(4.0));
+  expTime->SetAttribute("Mean", DoubleValue(2.0));
 
   PacketSinkHelper sink("ns3::UdpSocketFactory", Address(InetSocketAddress(sinkInterface.GetAddress(x, 0), 10)));
   ApplicationContainer app = sink.Install(sinkNodeContainer.Get(x));
-
 
   OnOffHelper onOffHelper("ns3::UdpSocketFactory", Address(InetSocketAddress(sinkInterface.GetAddress(x, 0), 10)));
   onOffHelper.SetAttribute("OnTime", PointerValue(expTime));
@@ -79,17 +78,42 @@ void createOnOff(NodeContainer sourceNodeContainer, uint32_t sourceClusterIndex,
   app = onOffHelper.Install(sourceNodeContainer.Get(y));
   
 
-
-  cout << "sourceNode: "+ to_string(sourceClusterIndex) + "-" +to_string(x) + " || sinkNode: ";
-  cout << to_string(sinkClusterIndex)+ "-" + to_string(y);
-  cout <<" OnTime: " + to_string(expTime->GetValue())+ " OffTime: "+ to_string(expTime->GetValue()) << endl;
-
-  // NS_LOG_UNCOND("OnTime: " + to_string(expTime->GetValue())+ " OffTime: "+ to_string(expTime->GetValue()) +"\n");  
-  // NS_LOG_UNCOND("---> " + to_string(x) + " || " +  to_string(y) + "\n");
-  // NS_LOG_UNCOND("TAMANO: " + to_string(sourceNodeContainer.GetGlobal().GetN()) + "\n");
-
+  cout <<to_string(expTime->GetValue())+ ","+ to_string(expTime->GetValue()) << endl;
   app.Start(Seconds(30.0));
   app.Stop(Seconds(60.0)); 
+}
+
+void createOnOffRandom(NodeContainer sourceNodeContainer, NodeContainer sinkNodeContainer, Ipv4InterfaceContainer sinkInterface, double dataRate, uint32_t packetSize){
+
+  double min = 0.0;
+  double max = 5.0;
+  
+  Ptr<UniformRandomVariable> xUniform = CreateObject<UniformRandomVariable> ();
+  xUniform->SetAttribute ("Min", DoubleValue (min));
+  xUniform->SetAttribute ("Max", DoubleValue (max));
+
+  Ptr<UniformRandomVariable> yUniform = CreateObject<UniformRandomVariable> ();
+  yUniform->SetAttribute ("Min", DoubleValue (min));
+  yUniform->SetAttribute ("Max", DoubleValue (max));
+
+  uint32_t x = xUniform->GetValue();
+  uint32_t y = yUniform->GetValue();
+
+  PacketSinkHelper sink("ns3::UdpSocketFactory", Address(InetSocketAddress(sinkInterface.GetAddress(x, 0), 10)));
+  ApplicationContainer app = sink.Install(sinkNodeContainer.Get(x));
+
+  OnOffHelper onOffHelper("ns3::UdpSocketFactory", Address(InetSocketAddress(sinkInterface.GetAddress(x, 0), 10)));
+  onOffHelper.SetAttribute("OnTime", StringValue("ns3::ConstantRandomVariable[Constant=4]"));
+  onOffHelper.SetAttribute("OffTime", StringValue("ns3::ConstantRandomVariable[Constant=0]"));
+  onOffHelper.SetAttribute("DataRate", StringValue(to_string(dataRate)+"Mbps"));
+  onOffHelper.SetAttribute("PacketSize", UintegerValue(packetSize));
+
+  app = onOffHelper.Install(sourceNodeContainer.Get(y));
+
+  NS_LOG_UNCOND("--->"+ to_string(x) + " || " +  to_string(y) + "\n");
+
+  app.Start(Seconds(30.0));
+  app.Stop(Seconds(40.0));
 }
   
 int main (int argc, char *argv[])

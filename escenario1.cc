@@ -34,14 +34,12 @@
 #include "ns3/internet-module.h"
 #include "ns3/random-variable-stream.h"
 
-#include "ns3/olsr-header.h"
-#include "pyviz.h"
+
 
 using namespace ns3;
 using namespace std;
 NS_LOG_COMPONENT_DEFINE ("WifiSimpleAdhocGrid");
 std::string phyMode ("DsssRate1Mbps");
-double distance = 10;  // m
 uint32_t packetSize = 1000; // bytes
 uint32_t numPackets = 1;
 uint32_t numNodes = 6;  // by default, 5x5
@@ -66,7 +64,7 @@ void createOnOff(NodeContainer sourceNodeContainer, uint32_t sourceClusterIndex,
 
   Ptr<ExponentialRandomVariable> expTime = CreateObject<ExponentialRandomVariable>();
 
-  expTime->SetAttribute("Mean", DoubleValue(4.0));
+  expTime->SetAttribute("Mean", DoubleValue(2.0));
 
   PacketSinkHelper sink("ns3::UdpSocketFactory", Address(InetSocketAddress(sinkInterface.GetAddress(x, 0), 10)));
   ApplicationContainer app = sink.Install(sinkNodeContainer.Get(x));
@@ -80,15 +78,7 @@ void createOnOff(NodeContainer sourceNodeContainer, uint32_t sourceClusterIndex,
   app = onOffHelper.Install(sourceNodeContainer.Get(y));
   
 
-
-  cout << "sourceNode: "+ to_string(sourceClusterIndex) + "-" +to_string(x) + " || sinkNode: ";
-  cout << to_string(sinkClusterIndex)+ "-" + to_string(y);
-  cout <<" OnTime: " + to_string(expTime->GetValue())+ " OffTime: "+ to_string(expTime->GetValue()) << endl;
-
-  // NS_LOG_UNCOND("OnTime: " + to_string(expTime->GetValue())+ " OffTime: "+ to_string(expTime->GetValue()) +"\n");  
-  // NS_LOG_UNCOND("---> " + to_string(x) + " || " +  to_string(y) + "\n");
-  // NS_LOG_UNCOND("TAMANO: " + to_string(sourceNodeContainer.GetGlobal().GetN()) + "\n");
-
+  cout <<to_string(expTime->GetValue())+ ","+ to_string(expTime->GetValue()) << endl;
   app.Start(Seconds(30.0));
   app.Stop(Seconds(60.0)); 
 }

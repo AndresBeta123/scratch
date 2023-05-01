@@ -1,4 +1,3 @@
-//Link state routing for Wired Networks, OLSR 
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -39,84 +38,94 @@ using namespace ns3;
 using namespace std;
 NS_LOG_COMPONENT_DEFINE ("WifiSimpleAdhocGrid");
 
-void ReceivePacket (Ptr<Socket> socket)
+std::string phyMode ("DsssRate1Mbps");
+uint32_t packetSize = 1000; // bytes
+uint32_t numPackets = 1;
+uint32_t numNodes = 6;  // by default, 5x5
+uint32_t sinkNode = 1;
+uint32_t sourceNode = 0;
+int numClustersCap1 = 8; // Escenario 3
+int numClustersCap2 = 3;
+int numNodesCap1 = 6;
+//int numNodesCap2 = 4;
+int numTotalClusters = numClustersCap1+numClustersCap2+1;
+double interval = 1.0; //Seconds
+bool verbose = false;
+bool tracing = false;
+
+static double geometric_truncated(int x, double p, int k)
 {
-  while (socket->Recv ())
-    {
-      NS_LOG_UNCOND ("Received one packet!");
-    }
+    return pow(1 - p, x - 1) * p / (1 - pow(1 - p, k));
 }
 
-static void GenerateTraffic (Ptr<Socket> socket, uint32_t pktSize,
-                            uint32_t pktCount, Time pktInterval )
-{
-  if (pktCount > 0)
-    {
-      socket->Send (Create<Packet> (pktSize));
-      Simulator::Schedule (pktInterval, &GenerateTraffic,
-                          socket, pktSize,pktCount - 1, pktInterval);
-    }
-  else
-    {
-      socket->Close ();
-    }
-}
+void createOnOff(NodeContainer sourceNodeContainer, uint32_t sourceClusterIndex,  uint32_t x, NodeContainer sinkNodeContainer, 
+                 uint32_t sinkClusterIndex, uint32_t y, Ipv4InterfaceContainer sinkInterface, 
+                 double dataRate, uint32_t packetSize){
 
-//Modificamos la función GenerateTraffic() para que genere paquetes con tiempos de llegada aleatorios
+  Ptr<ExponentialRandomVariable> expTime = CreateObject<ExponentialRandomVariable>();
 
-/* static void GenerateTraffic (Ptr<Socket> socket, uint32_t pktSize,
-                              uint32_t pktCount, Time pktInterval)
-{
-  if (pktCount > 0)
-    {
-      socket->Send (Create<Packet> (pktSize));
-      Time tNextPacket = Seconds(randomArrival.GetValue());
-      Simulator::Schedule (tNextPacket, &GenerateTraffic,
-                          socket, pktSize,pktCount - 1, pktInterval );
-    }
-  else
-    {
-      socket->Close ();
-    }
-} */
+  expTime->SetAttribute("Mean", DoubleValue(2.0));
+
+  PacketSinkHelper sink("ns3::UdpSocketFactory", Address(InetSocketAddress(sinkInterface.GetAddress(x, 0), 10)));
+  ApplicationContainer app = sink.Install(sinkNodeContainer.Get(x));
+
+  OnOffHelper onOffHelper("ns3::UdpSocketFactory", Address(InetSocketAddress(sinkInterface.GetAddress(x, 0), 10)));
+  onOffHelper.SetAttribute("OnTime", PointerValue(expTime));
+  onOffHelper.SetAttribute("OffTime", PointerValue(expTime));
+  onOffHelper.SetAttribute("DataRate", StringValue(to_string(dataRate)+"Mbps"));
+  onOffHelper.SetAttribute("PacketSize", UintegerValue(packetSize));
+
+  app = onOffHelper.Install(sourceNodeContainer.Get(y));
   
+
+  cout <<to_string(expTime->GetValue())+ ","+ to_string(expTime->GetValue()) << endl;
+  app.Start(Seconds(30.0));
+  app.Stop(Seconds(60.0)); 
+}
+
+void createOnOffRandom(NodeContainer sourceNodeContainer, NodeContainer sinkNodeContainer, Ipv4InterfaceContainer sinkInterface, double dataRate, uint32_t packetSize){
+
+  double min = 0.0;
+  double max = 5.0;
+  
+  Ptr<UniformRandomVariable> xUniform = CreateObject<UniformRandomVariable> ();
+  xUniform->SetAttribute ("Min", DoubleValue (min));
+  xUniform->SetAttribute ("Max", DoubleValue (max));
+
+  Ptr<UniformRandomVariable> yUniform = CreateObject<UniformRandomVariable> ();
+  yUniform->SetAttribute ("Min", DoubleValue (min));
+  yUniform->SetAttribute ("Max", DoubleValue (max));
+
+  uint32_t x = xUniform->GetValue();
+  uint32_t y = yUniform->GetValue();
+
+  PacketSinkHelper sink("ns3::UdpSocketFactory", Address(InetSocketAddress(sinkInterface.GetAddress(x, 0), 10)));
+  ApplicationContainer app = sink.Install(sinkNodeContainer.Get(x));
+
+  OnOffHelper onOffHelper("ns3::UdpSocketFactory", Address(InetSocketAddress(sinkInterface.GetAddress(x, 0), 10)));
+  onOffHelper.SetAttribute("OnTime", StringValue("ns3::ConstantRandomVariable[Constant=4]"));
+  onOffHelper.SetAttribute("OffTime", StringValue("ns3::ConstantRandomVariable[Constant=0]"));
+  onOffHelper.SetAttribute("DataRate", StringValue(to_string(dataRate)+"Mbps"));
+  onOffHelper.SetAttribute("PacketSize", UintegerValue(packetSize));
+
+  app = onOffHelper.Install(sourceNodeContainer.Get(y));
+
+  NS_LOG_UNCOND("--->"+ to_string(x) + " || " +  to_string(y) + "\n");
+
+  app.Start(Seconds(30.0));
+  app.Stop(Seconds(40.0));
+}
+
+
 int main (int argc, char *argv[])
 {
-  std::string phyMode ("DsssRate1Mbps");
-  double distance = 10;  // m
-  uint32_t packetSize = 1000; // bytes
-  uint32_t numPackets = 1;
-  uint32_t numNodes = 6;  // by default, 5x5
-  uint32_t sinkNode = 1;
-  uint32_t sourceNode = 0;
-  int numClustersCap1 = 8; // Escenario 3
-  int numClustersCap2 = 3;
-  int numNodesCap1 = 6;
-  //int numNodesCap2 = 4;
-  int numTotalClusters = numClustersCap1+numClustersCap2+1;
-  double interval = 1.0; //Seconds
-  bool verbose = false;
-  bool tracing = false;
 
 // Definimos una instancia de la clase PoissonRandomVariable y establecemos su valor medio,
 //el valor medio se establece a la inversa del intervalo inter-packet, ya que esto corresponde a la tasa de llegada media para una distribución de Poisson/*PoissonRandomVariable randomArrival;
 //randomArrival.SetAttribute ("Mean", DoubleValue (1.0 / interval));
 
-
   CommandLine cmd;
-  cmd.AddValue ("phyMode", "Wifi Phy mode", phyMode);
-  cmd.AddValue ("distance", "distance (m)", distance);
-  cmd.AddValue ("packetSize", "size of application packet sent", packetSize);
-  cmd.AddValue ("numPackets", "number of packets generated", numPackets);
-  cmd.AddValue ("interval", "interval (seconds) between packets", interval);
-  cmd.AddValue ("verbose", "turn on all WifiNetDevice log components", verbose);
-  cmd.AddValue ("tracing", "turn on ascii and pcap tracing", tracing);
-  cmd.AddValue ("numNodes", "number of nodes", numNodes);
-  cmd.AddValue ("sinkNode", "Receiver node number", sinkNode);
-  cmd.AddValue ("sourceNode", "Sender node number", sourceNode);
   cmd.Parse (argc, argv);
-  // Convert to time object
-  Time interPacketInterval = Seconds (interval);
 
   // Fix non-unicast data rate to be the same as that of unicast
   Config::SetDefault ("ns3::WifiRemoteStationManager::NonUnicastMode",
@@ -242,33 +251,40 @@ int main (int argc, char *argv[])
   }
 
 
+  // PRUEBA DE ENVIO BILATERAL
+  // createOnOff(c1Cluster[1], 1,  0, c1Cluster[0], 0,  1, d1[0], 0.5, 1024);
+  // createOnOff(c1Cluster[0], 0, 1, c1Cluster[1], 1, 0, d1[1], 0.5, 1024);
+
   //Escenario 3--------------------------------------------------------------------------
 
-  // TODO ESTE PERRO CODIGO ES PARA EL QUE RECIBE
-  // Generando aplicacion para instalar en el que recibe
-  PacketSinkHelper sink("ns3::UdpSocketFactory", Address(InetSocketAddress(d1[0].GetAddress(0, 0), 10)));
-  ApplicationContainer app = sink.Install(c1Cluster[0].Get(0));
+  Ptr<UniformRandomVariable> clusterUniform = CreateObject<UniformRandomVariable> ();
+  Ptr<UniformRandomVariable> nodeUniform = CreateObject<UniformRandomVariable> ();
 
-  // Generamos el onOff hacia el que recibe
-  OnOffHelper onOffHelper("ns3::UdpSocketFactory", Address(InetSocketAddress(d1[0].GetAddress(0, 0), 10)));
-  onOffHelper.SetAttribute("OnTime", StringValue("ns3::ConstantRandomVariable[Constant=4]"));
-  onOffHelper.SetAttribute("OffTime", StringValue("ns3::ConstantRandomVariable[Constant=0]"));
-  onOffHelper.SetAttribute("DataRate", StringValue("1Mbps"));
-  onOffHelper.SetAttribute("PacketSize", UintegerValue(1024));
+  clusterUniform->SetAttribute ("Min", DoubleValue (0));
+  clusterUniform->SetAttribute ("Max", DoubleValue (numClustersCap1));
 
-  // SOLO ESTA PINCHE LINEA ES PARA EL QUE ENVIA
-  // Instalo en el aplicationContainer el onOffHelper
-  app = onOffHelper.Install(c1Cluster[1].Get(0));
+  nodeUniform->SetAttribute ("Min", DoubleValue (0));
+  nodeUniform->SetAttribute ("Max", DoubleValue (numNodesCap1));
 
-  app.Start(Seconds(30.0));
-  app.Stop(Seconds(40.0));
+  for (int i = 0; i < numClustersCap1; i++)
+  {
+    for (int j = 1; j < numNodesCap1; j++){
+
+      uint32_t sinkCluster = clusterUniform->GetValue();
+      uint32_t sinkNode = nodeUniform->GetValue();
+
+      double dataRate = geometric_truncated(j+1, 0.7, numNodesCap1);
+      createOnOff(c1Cluster[i], i,  j, c1Cluster[sinkCluster], sinkCluster,  sinkNode, d1[i], dataRate, 1024); 
+    }
+  }
+  
+
+  // NO FUNCIONA QUE UN NODO ENVIE DOS VECES AL MISMO TIEMPO A DOS NODOS DIFERENTES
+  // createOnOff(c1Cluster[1], 0, c1Cluster[0], 1, d1[0], 0.5, 1024);
+  // createOnOff(c1Cluster[1], 0, c1Cluster[0], 2, d1[0], 0.5, 1024);
 
 
-
-  // Output what we are doing
-  NS_LOG_UNCOND ("Testing from node " << sourceNode << " to " << sinkNode << " with grid distance " << distance);
-
-  Simulator::Stop (Seconds (50.0));
+  Simulator::Stop (Seconds (60.0));
   Simulator::Run ();
   Simulator::Destroy ();
 
