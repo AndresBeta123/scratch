@@ -269,7 +269,8 @@ int main (int argc, char *argv[])
       createOnOff(c1Cluster[i], i,  j, c1Cluster[sinkCluster], sinkCluster,  sinkNode, d1[i], dataRate, 1024); 
     }
   }
-  
+  AsciiTraceHelper ascii;
+  wifiPhy[0].EnableAsciiAll(ascii.CreateFileStream("file.tr"));
   Simulator::Stop (Seconds (60.0));
   Simulator::Run ();
   Simulator::Destroy ();

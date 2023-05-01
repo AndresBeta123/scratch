@@ -273,7 +273,7 @@ int main (int argc, char *argv[])
       uint32_t sinkCluster = clusterUniform->GetValue();
       uint32_t sinkNode = nodeUniform->GetValue();
 
-      double dataRate = geometric_truncated(j+1, 0.7, numNodesCap1);
+      double dataRate = geometric_truncated(j, 0.7, numNodesCap1);
       createOnOff(c1Cluster[i], i,  j, c1Cluster[sinkCluster], sinkCluster,  sinkNode, d1[i], dataRate, 1024); 
     }
   }
@@ -283,7 +283,8 @@ int main (int argc, char *argv[])
   // createOnOff(c1Cluster[1], 0, c1Cluster[0], 1, d1[0], 0.5, 1024);
   // createOnOff(c1Cluster[1], 0, c1Cluster[0], 2, d1[0], 0.5, 1024);
 
-
+  AsciiTraceHelper ascii;
+  wifiPhy[0].EnableAsciiAll(ascii.CreateFileStream("file.tr"));
   Simulator::Stop (Seconds (60.0));
   Simulator::Run ();
   Simulator::Destroy ();

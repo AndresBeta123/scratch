@@ -39,12 +39,13 @@
 using namespace ns3;
 using namespace std;
 NS_LOG_COMPONENT_DEFINE ("WifiSimpleAdhocGrid");
-std::string phyMode ("DsssRate1Mbps");
+std::string phyMode ("DsssRate2Mbps");
 uint32_t packetSize = 1000; // bytes
 uint32_t numPackets = 1;
 uint32_t numNodes = 6;  // by default, 5x5
 uint32_t sinkNode = 1;
 uint32_t sourceNode = 0;
+int capacidadCap2=2;
 int numClustersCap1 = 4; // Escenario 1
 int numClustersCap2 = 2;
 int numNodesCap1 = 6;
@@ -72,7 +73,7 @@ void createOnOff(NodeContainer sourceNodeContainer, uint32_t sourceClusterIndex,
   OnOffHelper onOffHelper("ns3::UdpSocketFactory", Address(InetSocketAddress(sinkInterface.GetAddress(x, 0), 10)));
   onOffHelper.SetAttribute("OnTime", PointerValue(expTime));
   onOffHelper.SetAttribute("OffTime", PointerValue(expTime));
-  onOffHelper.SetAttribute("DataRate", StringValue(to_string(dataRate)+"Mbps"));
+  onOffHelper.SetAttribute("DataRate", StringValue(to_string((dataRate*(capacidadCap2/numClustersCap1)))+"Mbps"));
   onOffHelper.SetAttribute("PacketSize", UintegerValue(packetSize));
 
   app = onOffHelper.Install(sourceNodeContainer.Get(y));
@@ -264,7 +265,7 @@ int main (int argc, char *argv[])
       uint32_t sinkCluster = clusterUniform->GetValue();
       uint32_t sinkNode = nodeUniform->GetValue();
 
-      double dataRate = geometric_truncated(j+1, 0.7, numNodesCap1);
+      double dataRate = geometric_truncated(j, 0.7, numNodesCap1);
       createOnOff(c1Cluster[i], i,  j, c1Cluster[sinkCluster], sinkCluster,  sinkNode, d1[i], dataRate, 1024); 
     }
   }
@@ -274,7 +275,8 @@ int main (int argc, char *argv[])
   // createOnOff(c1Cluster[1], 0, c1Cluster[0], 1, d1[0], 0.5, 1024);
   // createOnOff(c1Cluster[1], 0, c1Cluster[0], 2, d1[0], 0.5, 1024);
 
-
+  AsciiTraceHelper ascii;
+  wifiPhy[0].EnableAsciiAll(ascii.CreateFileStream("ando.tr"));
   Simulator::Stop (Seconds (60.0));
   Simulator::Run ();
   Simulator::Destroy ();
