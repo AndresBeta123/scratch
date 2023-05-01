@@ -39,13 +39,13 @@
 using namespace ns3;
 using namespace std;
 NS_LOG_COMPONENT_DEFINE ("WifiSimpleAdhocGrid");
-std::string phyMode ("DsssRate2Mbps");
+std::string phyMode ("DsssRate1Mbps");
 uint32_t packetSize = 1000; // bytes
 uint32_t numPackets = 1;
 uint32_t numNodes = 6;  // by default, 5x5
 uint32_t sinkNode = 1;
 uint32_t sourceNode = 0;
-int capacidadCap2=2;
+int capacidadCap2=1;
 int numClustersCap1 = 4; // Escenario 1
 int numClustersCap2 = 2;
 int numNodesCap1 = 6;
@@ -73,12 +73,13 @@ void createOnOff(NodeContainer sourceNodeContainer, uint32_t sourceClusterIndex,
   OnOffHelper onOffHelper("ns3::UdpSocketFactory", Address(InetSocketAddress(sinkInterface.GetAddress(x, 0), 10)));
   onOffHelper.SetAttribute("OnTime", PointerValue(expTime));
   onOffHelper.SetAttribute("OffTime", PointerValue(expTime));
-  onOffHelper.SetAttribute("DataRate", StringValue(to_string((dataRate*(capacidadCap2/numClustersCap1)))+"Mbps"));
+  onOffHelper.SetAttribute("DataRate", StringValue(to_string(dataRate*(static_cast<double>(capacidadCap2)/numClustersCap1))+"Mbps"));
   onOffHelper.SetAttribute("PacketSize", UintegerValue(packetSize));
 
   app = onOffHelper.Install(sourceNodeContainer.Get(y));
   
 
+  // cout << to_string(capacidadCap2) + "-" << to_string(numClustersCap1) + "-" << to_string(static_cast<double>(capacidadCap2)/numClustersCap1) << to_string((dataRate*(capacidadCap2/numClustersCap1))) << endl;
   cout <<to_string(expTime->GetValue())+ ","+ to_string(expTime->GetValue()) << endl;
   app.Start(Seconds(30.0));
   app.Stop(Seconds(60.0)); 
