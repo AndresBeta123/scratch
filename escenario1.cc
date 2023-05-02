@@ -269,7 +269,7 @@ int main (int argc, char *argv[])
       uint32_t sinkNode = nodeUniform->GetValue();
 
       double dataRate = geometric_truncated(j, 0.1, numNodesCap1);
-      createOnOff(c1Cluster[i], i,  j, c1Cluster[sinkCluster], sinkCluster,  sinkNode, d1[i], dataRate, 256); 
+      createOnOff(c1Cluster[i], i,  j, c1Cluster[sinkCluster], sinkCluster,  sinkNode, d1[i], dataRate, 512); 
     }
   }
   

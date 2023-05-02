@@ -44,6 +44,8 @@ uint32_t numPackets = 1;
 uint32_t numNodes = 6;  // by default, 5x5
 uint32_t sinkNode = 1;
 uint32_t sourceNode = 0;
+double tiempoEnvios = 120.0;
+int capacidadCap2=1;
 int numClustersCap1 = 10; // Escenario 2
 int numClustersCap2 = 8;
 int numNodesCap1 = 3;
@@ -57,7 +59,6 @@ static double geometric_truncated(int x, double p, int k)
 {
     return pow(1 - p, x - 1) * p / (1 - pow(1 - p, k));
 }
-
 void createOnOff(NodeContainer sourceNodeContainer, uint32_t sourceClusterIndex,  uint32_t x, NodeContainer sinkNodeContainer, 
                  uint32_t sinkClusterIndex, uint32_t y, Ipv4InterfaceContainer sinkInterface, 
                  double dataRate, uint32_t packetSize){
@@ -72,49 +73,19 @@ void createOnOff(NodeContainer sourceNodeContainer, uint32_t sourceClusterIndex,
   OnOffHelper onOffHelper("ns3::UdpSocketFactory", Address(InetSocketAddress(sinkInterface.GetAddress(x, 0), 10)));
   onOffHelper.SetAttribute("OnTime", PointerValue(expTime));
   onOffHelper.SetAttribute("OffTime", PointerValue(expTime));
-  onOffHelper.SetAttribute("DataRate", StringValue(to_string(dataRate)+"Mbps"));
+  onOffHelper.SetAttribute("DataRate", StringValue(to_string(static_cast<int>((dataRate*(static_cast<double>(capacidadCap2)/numClustersCap1) * 1000)))+"Kbps"));
   onOffHelper.SetAttribute("PacketSize", UintegerValue(packetSize));
 
   app = onOffHelper.Install(sourceNodeContainer.Get(y));
   
 
+  cout << "este: " + to_string(static_cast<int>((dataRate*(static_cast<double>(capacidadCap2)/numClustersCap1) * 1000))) << endl;
+  // cout << to_string(capacidadCap2) + "-" << to_string(numClustersCap1) + "-" << to_string(static_cast<double>(capacidadCap2)/numClustersCap1) << to_string((dataRate*(capacidadCap2/numClustersCap1))) << endl;
   cout <<to_string(expTime->GetValue())+ ","+ to_string(expTime->GetValue()) << endl;
   app.Start(Seconds(30.0));
-  app.Stop(Seconds(60.0)); 
+  app.Stop(Seconds(tiempoEnvios)); 
 }
 
-void createOnOffRandom(NodeContainer sourceNodeContainer, NodeContainer sinkNodeContainer, Ipv4InterfaceContainer sinkInterface, double dataRate, uint32_t packetSize){
-
-  double min = 0.0;
-  double max = 5.0;
-  
-  Ptr<UniformRandomVariable> xUniform = CreateObject<UniformRandomVariable> ();
-  xUniform->SetAttribute ("Min", DoubleValue (min));
-  xUniform->SetAttribute ("Max", DoubleValue (max));
-
-  Ptr<UniformRandomVariable> yUniform = CreateObject<UniformRandomVariable> ();
-  yUniform->SetAttribute ("Min", DoubleValue (min));
-  yUniform->SetAttribute ("Max", DoubleValue (max));
-
-  uint32_t x = xUniform->GetValue();
-  uint32_t y = yUniform->GetValue();
-
-  PacketSinkHelper sink("ns3::UdpSocketFactory", Address(InetSocketAddress(sinkInterface.GetAddress(x, 0), 10)));
-  ApplicationContainer app = sink.Install(sinkNodeContainer.Get(x));
-
-  OnOffHelper onOffHelper("ns3::UdpSocketFactory", Address(InetSocketAddress(sinkInterface.GetAddress(x, 0), 10)));
-  onOffHelper.SetAttribute("OnTime", StringValue("ns3::ConstantRandomVariable[Constant=4]"));
-  onOffHelper.SetAttribute("OffTime", StringValue("ns3::ConstantRandomVariable[Constant=0]"));
-  onOffHelper.SetAttribute("DataRate", StringValue(to_string(dataRate)+"Mbps"));
-  onOffHelper.SetAttribute("PacketSize", UintegerValue(packetSize));
-
-  app = onOffHelper.Install(sourceNodeContainer.Get(y));
-
-  NS_LOG_UNCOND("--->"+ to_string(x) + " || " +  to_string(y) + "\n");
-
-  app.Start(Seconds(30.0));
-  app.Stop(Seconds(40.0));
-}
   
 int main (int argc, char *argv[])
 {
@@ -260,18 +231,19 @@ int main (int argc, char *argv[])
 
   for (int i = 0; i < numClustersCap1; i++)
   {
-    for (int j = 1; j < numNodesCap1; j++){
+    for (int j = 0; j < numNodesCap1; j++){
 
       uint32_t sinkCluster = clusterUniform->GetValue();
       uint32_t sinkNode = nodeUniform->GetValue();
 
-      double dataRate = geometric_truncated(j+1, 0.7, numNodesCap1);
-      createOnOff(c1Cluster[i], i,  j, c1Cluster[sinkCluster], sinkCluster,  sinkNode, d1[i], dataRate, 1024); 
+      double dataRate = geometric_truncated(j, 0.1, numNodesCap1);
+      createOnOff(c1Cluster[i], i,  j, c1Cluster[sinkCluster], sinkCluster,  sinkNode, d1[i], dataRate, 512); 
     }
   }
+  
   AsciiTraceHelper ascii;
   wifiPhy[0].EnableAsciiAll(ascii.CreateFileStream("file.tr"));
-  Simulator::Stop (Seconds (60.0));
+  Simulator::Stop (Seconds (tiempoEnvios));
   Simulator::Run ();
   Simulator::Destroy ();
 
